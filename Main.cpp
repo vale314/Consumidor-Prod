@@ -111,6 +111,10 @@ int main()
     char choice;
     int ass;
 
+    int slepCons = 0;
+    int slepProd = 0;
+
+
     initializer();
 
     std:: chrono::seconds dura(2);
@@ -120,25 +124,35 @@ int main()
         srand(time(NULL));
         cons  = (rand() % 9) +1;
 
-        cout<< "Prod: " << item << "Cons: "<< cons << endl;
 
+
+        if(cons == 9)
+            cout<< "Prod: " << item << "Cons: "<< " Se Quedo Dormido " << endl;
+        else
+            if(item == 2)
+            cout<< "Prod: " << " Se Quedo Dormido"<< " Cons" << cons << endl;
+            else
+                cout<< "Prod: " << item << "Cons: " << cons <<endl;
         //std::this_thread::sleep_for(dura);
 
         if(item >= maxBufferSize - numE){
             item = maxBufferSize - numE;
         }
 
-        std:: thread t1(producer, item);
-
+        if(item != 2){
+            std:: thread t1(producer, item);
+            t1.join();
+        }
 
         if(cons >= numE){
             cons = numE;
         }
 
-        std:: thread t2(consumer, cons);
+        if(cons !=9){
 
-        t1.join();
-        t2.join();
+            std:: thread t2(consumer, cons);
+            t2.join();
+          }
 
         println();
 
