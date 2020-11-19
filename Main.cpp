@@ -11,8 +11,14 @@
 #include <iostream>
 #include <thread>
 #include <conio.h>
+#include <chrono>
+#include <atomic>
+
 
 using namespace std;
+
+int item;
+int cons;
 
 std::mutex mu;
 std::condition_variable cond;
@@ -21,7 +27,7 @@ const unsigned int maxBufferSize = 20;
 
 int numE = 0;
 
-
+std:: atomic<bool> stop( false );
 
 int spaceProd = 0;
 int spaceCons = 0;
@@ -35,6 +41,25 @@ void initializer(){
 }
 
 
+void println(){
+
+    int i;
+    if(cons == 9)
+        cout<< "Prod: " << item << "Cons: "<< " Se Quedo Dormido " << endl;
+    else
+        if(item == 2)
+        cout<< "Prod: " << " Se Quedo Dormido"<< " Cons" << cons << endl;
+        else
+            cout<< "Prod: " << item << "Cons: " << cons <<endl;
+    for(i = 0; i < maxBufferSize-1; i++){
+        if(buffer[i] == 99)
+            cout << "- ";
+        else
+            cout << "^ ";
+    }
+    cout << endl;
+    std:: this_thread::sleep_for(std::chrono::milliseconds(200));
+}
 void producer(int val){
     while(val){
         std::unique_lock<std::mutex> locker(mu);
@@ -54,7 +79,8 @@ void producer(int val){
         if(spaceProd == maxBufferSize-1){
             spaceProd = 0;
         }
-
+        println();
+        system("cls");
         locker.unlock();
         cond.notify_one();
     }
@@ -62,6 +88,7 @@ void producer(int val){
 
 void consumer(int value){
     while(value){
+
         std::unique_lock<std:: mutex> locker(mu);
         cond.wait(locker, [](){return numE > 0;});
 
@@ -80,32 +107,16 @@ void consumer(int value){
 
         cout << "Consumed: " << val << endl;
         value--;
+        println();
+        system("cls");
         locker.unlock();
         cond.notify_one();
     }
 }
 
-void println(){
 
-    int i;
-
-    for(i = 0; i < maxBufferSize-1; i++){
-        if(buffer[i] == 99)
-            cout << "- ";
-        else
-            cout << "^ ";
-    }
-    cout << endl;
-
-}
-
-int main()
-{
-
+void loop(){
     srand((unsigned)time(NULL));
-
-    int item;
-    int cons;
 
 
     char choice;
@@ -117,23 +128,14 @@ int main()
 
     initializer();
 
-    std:: chrono::seconds dura(2);
 
-    while(true){
+    while(!kbhit()){
         item  = (rand() % 10) + 1;
         srand(time(NULL));
         cons  = (rand() % 9) +1;
 
 
 
-        if(cons == 9)
-            cout<< "Prod: " << item << "Cons: "<< " Se Quedo Dormido " << endl;
-        else
-            if(item == 2)
-            cout<< "Prod: " << " Se Quedo Dormido"<< " Cons" << cons << endl;
-            else
-                cout<< "Prod: " << item << "Cons: " << cons <<endl;
-        //std::this_thread::sleep_for(dura);
 
         if(item >= maxBufferSize - numE){
             item = maxBufferSize - numE;
@@ -154,18 +156,29 @@ int main()
             t2.join();
           }
 
-        println();
+//        println();
 
+//        cout << "'ESC para salir' \n Otra Por Continuar" <<endl;
 
-        cin.clear();
-        fflush(stdin);
+//        cin.clear();
+//        fflush(stdin);
 
-        choice=getch();
-        ass=choice;
+//        choice=getch();
+//        ass=choice;
 
-        if(ass==27)
-            break;
+//        if(ass==27)
+//            break;
     }
+
+}
+
+
+int main()
+{
+
+   loop();
+
+   println();
 
     return 0;
 }
